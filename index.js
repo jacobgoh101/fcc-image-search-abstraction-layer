@@ -2,6 +2,7 @@ const ImagesClient = require('google-images');
 const express = require('express');
 const mongodb = require('mongodb');
 const async = require('async');
+const helmet = require('helmet');
 
 let imagesClient = new ImagesClient('011656522313889263409:jfejwn3fubo', 'AIzaSyCtvMSBtBTjhl42ZRfCGtZL7epjqedBFn8');
 
@@ -11,6 +12,7 @@ const dbUrl = process.env.MONGOLAB_URI ? process.env.MONGOLAB_URI + dbName : "mo
 const baseUrl = process.env.BASE_URL || 'http://localhost:8080';
 
 const app = express();
+app.use(helmet());
 
 app.get("/api/imagesearch/:searchStr", (req,res) => {
   res.setHeader("Content-Type", "application/json");
