@@ -1,16 +1,47 @@
 const ImagesClient = require('google-images');
 const express = require('express');
+const mongodb = require('mongodb');
 const async = require('async');
 
 let imagesClient = new ImagesClient('011656522313889263409:jfejwn3fubo', 'AIzaSyCtvMSBtBTjhl42ZRfCGtZL7epjqedBFn8');
 
-
+const MongoClient = mongodb.MongoClient;
+const dbName = "img-search-api";
+const dbUrl = process.env.MONGOLAB_URI ? process.env.MONGOLAB_URI + dbName : "mongodb://localhost:27017/" + dbName; //"mongodb://jacob:jacob123@ds063899.mlab.com:63899/fcc-img-search-api";
+const baseUrl = process.env.BASE_URL || 'http://localhost:8080';
 
 const app = express();
 
 app.get("/api/imagesearch/:searchStr", (req,res) => {
+  res.setHeader("Content-Type", "application/json");
+
   let searchStr = req.params.searchStr;
   let offset = req.query.offset;
+
+  // log search into db
+  MongoClient.connect(dbUrl, function (err, db) {
+    if (err) {
+      console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      console.log('Connection established to', dbUrl);
+    }
+
+    const collection = db.collection('img-search-api');
+
+    collection.insertMany([
+      {
+        term: searchStr,
+        when: new Date().toISOString()
+      }
+    ],(err,results) => {
+      if(err) callback(err);
+
+      db.close();
+    })
+
+    db.close();
+  });
+
   imagesClient.search(searchStr, {
     page: offset
   }).then(function (images) {
@@ -23,6 +54,31 @@ app.get("/api/imagesearch/:searchStr", (req,res) => {
       }
     });
     res.json(results);
+  });
+});
+
+app.get("/api/latest/imagesearch", (req,res) => {
+  res.setHeader("Content-Type", "application/json");
+
+  MongoClient.connect(dbUrl, function (err, db) {
+    if (err) {
+      console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      console.log('Connection established to', dbUrl);
+    }
+
+    const collection = db.collection('img-search-api');
+
+    collection.find({}, {
+      _id: 0
+    }).sort({
+      when: -1
+    }).toArray((err,docs) => {
+      if(err) throw err;
+      res.json(docs);
+    })
+
+    db.close();
   });
 });
 
