@@ -84,5 +84,16 @@ app.get("/api/latest/imagesearch", (req,res) => {
   });
 });
 
+app.get("/", (req,res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.json({
+    Name: "FCC Image Search Abstraction Layer",
+    Example: {
+      search: baseUrl + "/api/imagesearch/blue%20car?offset=1",
+      listSearchHistory: baseUrl + "/api/latest/imagesearch"
+    }
+  })
+});
+
 const port = process.env.PORT || 8080;
 app.listen(port);
