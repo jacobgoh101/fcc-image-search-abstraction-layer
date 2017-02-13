@@ -9,6 +9,7 @@ let imagesClient = new ImagesClient('011656522313889263409:jfejwn3fubo', 'AIzaSy
 const MongoClient = mongodb.MongoClient;
 const dbName = "img-search-api";
 const dbUrl = process.env.MONGOLAB_URI ? process.env.MONGOLAB_URI + dbName : "mongodb://localhost:27017/" + dbName; //"mongodb://jacob:jacob123@ds151289.mlab.com:51289/fcc-img-search-api";
+console.log('dbUrl: ' + dbUrl);
 const baseUrl = process.env.BASE_URL || 'http://localhost:8080';
 
 const app = express();
